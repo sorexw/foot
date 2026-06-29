@@ -73,7 +73,10 @@ in
 
     programs = {
       foot.settings.main.include = lib.optionals (cfg.theme.name != null) [
-        "${cfg.theme.repository}/${cfg.theme.name}"
+        (if lib.hasSuffix ".ini" cfg.theme.name then
+          "${cfg.theme.repository}/${cfg.theme.name}"
+        else
+          "${cfg.theme.repository}/${cfg.theme.name}.ini")
       ];
 
       bash.interactiveShellInit = lib.mkIf cfg.enableBashIntegration ". ${./bashrc} # enable shell integration";
