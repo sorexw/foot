@@ -39,10 +39,19 @@ in
       serverAutostart = lib.mkEnableOption "starting the foot server via xdg-autostart";
     };
 
-    theme = lib.mkOption {
-      type = with lib.types; nullOr str;
-      default = null;
-      description = "Theme name from your repository.";
+    theme = {
+      name = lib.mkOption {
+        type = with lib.types; nullOr str;
+        default = null;
+        description = "Name of the theme to apply.";
+        example = "kanagawa-wave";
+      };
+
+      repository = lib.mkOption {
+        type = with lib.types; either path package;
+        default = ./themes;
+        description = "Path or derivation containing the themes.";
+      };
     };
 
     enableBashIntegration = lib.mkEnableOption "foot bash integration" // { default = true; };
@@ -63,9 +72,10 @@ in
     ];
 
     programs = {
-      foot.settings.main.include = lib.optionals (cfg.theme != null) [
-        "${./themes}/${cfg.theme}"
+      foot.settings.main.include = lib.optionals (cfg.theme.name != null) [
+        "${cfg.theme.repository}/${cfg.theme.name}"
       ];
+
       bash.interactiveShellInit = lib.mkIf cfg.enableBashIntegration ". ${./bashrc} # enable shell integration";
       fish.interactiveShellInit = lib.mkIf cfg.enableFishIntegration "source ${./config.fish} # enable shell integration";
       zsh.interactiveShellInit = lib.mkIf cfg.enableZshIntegration ". ${./zshrc} # enable shell integration";
